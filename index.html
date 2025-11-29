@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Ladder Quest v3.3 (With Undo)</title>
+    <title>Word Ladder Quest v3.4 (Reset Feature)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -220,7 +219,7 @@
                     <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-indigo-600 font-bold shrink-0 text-sm">2</div>
                     <div>
                         <h3 class="font-bold text-slate-800 text-sm">卡關時？</h3>
-                        <p class="text-xs text-slate-500 mt-1">如果提示告訴你「死胡同」，請使用輸入框左側的 <b class="text-slate-700">UNDO</b> 按鈕退回上一步。</p>
+                        <p class="text-xs text-slate-500 mt-1">請使用輸入框左側的 <b class="text-slate-700">UNDO</b> 按鈕退回上一步。</p>
                     </div>
                 </div>
                 <button onclick="toggleTutorial()" class="w-full mt-2 py-2 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition">OK!</button>
@@ -229,13 +228,17 @@
     </div>
 
     <div id="prizes-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl relative animate-pop">
+        <div class="bg-white w-full max-w-xs rounded-2xl p-5 shadow-2xl relative animate-pop flex flex-col max-h-[80vh]">
             <button onclick="togglePrizes()" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
                 <i class="ph ph-x text-lg"></i>
             </button>
             <h2 class="text-xl font-bold text-center text-indigo-600 mb-4 font-heading">🏆 獎品櫃</h2>
-            <div id="prizes-grid" class="grid grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto p-1"></div>
+            <div id="prizes-grid" class="flex-grow grid grid-cols-4 gap-3 overflow-y-auto p-1 mb-4"></div>
             <p id="no-prizes-msg" class="text-center text-slate-400 text-xs py-6 hidden">空空如也...</p>
+            
+            <button onclick="resetProgress()" class="w-full py-2 bg-red-50 text-red-500 rounded-lg text-xs font-bold border border-red-100 hover:bg-red-100 transition flex items-center justify-center gap-2 mt-auto">
+                <i class="ph-bold ph-trash"></i> 重置所有進度
+            </button>
         </div>
     </div>
 
@@ -783,6 +786,13 @@
                     container.appendChild(div);
                 }
             });
+        }
+
+        // ADDED: Reset Function
+        function resetProgress() {
+            if(!confirm("確定要清除所有積分和獎品嗎？此動作無法復原。")) return;
+            localStorage.removeItem('wordLadderData_v3');
+            location.reload();
         }
     </script>
 </body>
