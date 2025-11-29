@@ -55,6 +55,33 @@
       "minSteps": 5,
       "startEmoji": "🦍",
       "endEmoji": "👨"
+    },{
+      "start": "car",
+      "end": "bus",
+      "minSteps": 3,
+      "startEmoji": "🚗",
+      "endEmoji": "🚌"
+    },
+    {
+      "start": "day",
+      "end": "eve",
+      "minSteps": 3,
+      "startEmoji": "☀️",
+      "endEmoji": "🌙"
+    },
+    {
+      "start": "cow",
+      "end": "fox",
+      "minSteps": 3,
+      "startEmoji": "🐮",
+      "endEmoji": "🦊"
+    },
+    {
+      "start": "sky",
+      "end": "sea",
+      "minSteps": 3,
+      "startEmoji": "☁️",
+      "endEmoji": "🌊"
     }
   ],
   "medium": [
@@ -108,6 +135,41 @@
       "endEmoji": "💡"
     },
     {
+      "start": "fire",
+      "end": "heat",
+      "minSteps": 4,
+      "startEmoji": "🔥",
+      "endEmoji": "🌡️"
+    },
+    {
+      "start": "rain",
+      "end": "snow",
+      "minSteps": 5,
+      "startEmoji": "🌧️",
+      "endEmoji": "❄️"
+    },
+    {
+      "start": "find",
+      "end": "lose",
+      "minSteps": 4,
+      "startEmoji": "🔍",
+      "endEmoji": "🤷"
+    },
+    {
+      "start": "book",
+      "end": "page",
+      "minSteps": 4,
+      "startEmoji": "📕",
+      "endEmoji": "📄"
+    },
+    {
+      "start": "fast",
+      "end": "slow",
+      "minSteps": 5,
+      "startEmoji": "🐇",
+      "endEmoji": "🐢"
+    },
+    {
       "start": "hate",
       "end": "love",
       "minSteps": 4,
@@ -129,6 +191,55 @@
       "minSteps": 7,
       "startEmoji": "⚫",
       "endEmoji": "⚪"
+    },
+    {
+      "start": "train",
+      "end": "track",
+      "minSteps": 5,
+      "startEmoji": "🚂",
+      "endEmoji": "🛤️"
+    },
+    {
+      "start": "beach",
+      "end": "peace",
+      "minSteps": 5,
+      "startEmoji": "🏖️",
+      "endEmoji": "🕊️"
+    },
+        {
+      "start": "flour",
+      "end": "bread",
+      "minSteps": 6,
+      "startEmoji": "🌾",
+      "endEmoji": "🍞"
+    },
+    {
+      "start": "sleep",
+      "end": "dream",
+      "minSteps": 6,
+      "startEmoji": "😴",
+      "endEmoji": "💭"
+    },
+    {
+      "start": "river",
+      "end": "water",
+      "minSteps": 4,
+      "startEmoji": "🏞️",
+      "endEmoji": "💧"
+    },
+    {
+      "start": "wheat",
+      "end": "bread",
+      "minSteps": 7,
+      "startEmoji": "🌾",
+      "endEmoji": "🍞"
+    },
+    {
+      "start": "night",
+      "end": "light",
+      "minSteps": 2,
+      "startEmoji": "🌃",
+      "endEmoji": "💡"
     }
   ]
 }
