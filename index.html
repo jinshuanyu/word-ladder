@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Word Ladder v3.5</title>
+    <title>Word Ladder Quest v3.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -13,11 +13,11 @@
 
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #f1f5f9;
+            background-color: #f0f4f8;
             touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            height: 100dvh; /* 滿版高度 */
-            overflow: hidden; /* 禁止整體滾動 */
+            height: 100dvh; /* 確保滿版高度 */
+            overflow: hidden;
         }
 
         h1, h2, h3, .font-heading { font-family: 'Fredoka', sans-serif; }
@@ -34,186 +34,213 @@
             0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .pop-in { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .pop-in { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="text-slate-700">
+<body class="bg-slate-100 flex flex-col items-center">
 
-    <div id="loading-screen" class="fixed inset-0 bg-slate-100 z-[60] flex items-center justify-center transition-opacity duration-500">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    <div id="loading-screen" class="fixed inset-0 bg-slate-100 z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-3"></div>
+        <p id="loading-text" class="text-indigo-600 font-bold animate-pulse text-xs">Loading...</p>
     </div>
 
-    <div class="w-full h-full max-w-md mx-auto flex flex-col bg-[#f0f4f8] relative shadow-2xl">
+    <div class="w-full max-w-4xl flex flex-col md:flex-row h-full md:p-6 p-0 gap-0 md:gap-6">
 
-        <header class="shrink-0 bg-white z-20 border-b border-slate-200 shadow-sm transition-all duration-300">
+        <aside class="w-full md:w-24 bg-white md:rounded-3xl shadow-sm md:h-full z-20 flex flex-row md:flex-col items-center justify-between md:justify-start p-2 md:py-6 gap-2 md:gap-4 shrink-0 border-b md:border-b-0 md:border-r border-slate-200">
             
-            <div class="flex justify-between items-center px-4 py-2">
-                <div class="flex items-center gap-2">
-                    <button id="back-btn" onclick="confirmGiveUp()" class="hidden p-2 -ml-2 text-slate-400 hover:text-red-500 rounded-full hover:bg-slate-100 transition">
-                        <i class="ph-bold ph-arrow-left text-xl"></i>
-                    </button>
-                    <h1 class="font-heading font-bold text-indigo-600 text-lg leading-none">Word<br>Ladder</h1>
-                </div>
+            <div class="flex items-center gap-2 md:flex-col">
+                <div class="bg-indigo-600 text-white w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center font-bold text-lg font-heading shadow-md">W</div>
+                <h1 class="hidden md:block text-xs font-bold text-slate-400 tracking-widest text-center">WORD<br>LADDER</h1>
+            </div>
 
-                <div class="flex items-center gap-2">
-                    <div class="bg-orange-50 px-3 py-1 rounded-full flex items-center gap-1 border border-orange-100">
-                        <i class="ph-fill ph-coin text-orange-500 text-sm"></i>
-                        <span id="score-display" class="font-bold text-orange-600 text-sm">200</span>
-                    </div>
-                    <button onclick="togglePrizes()" class="relative w-8 h-8 bg-yellow-50 rounded-full flex items-center justify-center text-yellow-600 border border-yellow-100">
-                        <i class="ph-fill ph-trophy"></i>
-                        <span id="new-prize-badge" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full hidden animate-bounce border-2 border-white"></span>
-                    </button>
+            <div class="flex-1 md:flex-none flex md:flex-col items-center justify-center bg-orange-50 px-3 py-1.5 md:p-3 rounded-full md:rounded-2xl border border-orange-100 gap-2 md:gap-1 md:w-full">
+                <i class="ph-fill ph-coin text-orange-500 text-sm md:text-xl"></i>
+                <div class="flex flex-col md:items-center leading-none">
+                    <span class="text-[8px] font-bold text-orange-300 hidden md:block">POINTS</span>
+                    <span class="text-sm md:text-lg font-bold text-orange-600" id="score-display">0</span>
                 </div>
             </div>
 
-            <div id="goal-bar" class="hidden px-4 pb-3 pt-1">
-                <div class="flex items-center justify-between bg-white rounded-xl p-2 border border-slate-200 shadow-sm relative overflow-hidden">
-                    <div id="progress-bg" class="absolute bottom-0 left-0 h-1 bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
+            <button onclick="togglePrizes()" class="relative p-2 md:p-3 hover:bg-slate-50 rounded-xl transition group md:w-full md:aspect-square flex flex-col items-center justify-center">
+                <i class="ph ph-trophy text-2xl md:text-3xl text-yellow-500 group-hover:scale-110 transition"></i>
+                <span id="new-prize-badge" class="absolute top-1 right-1 md:top-2 md:right-4 w-2.5 h-2.5 bg-red-500 rounded-full hidden animate-bounce border-2 border-white"></span>
+            </button>
 
-                    <div class="flex items-center gap-2 z-10 opacity-70 grayscale">
-                        <span id="start-emoji-display" class="text-2xl"></span>
-                        <span id="start-word-display" class="font-mono font-bold text-slate-500 text-sm"></span>
+            <button onclick="toggleTutorial()" class="p-2 md:p-3 hover:bg-slate-50 rounded-xl transition md:mt-auto text-slate-400 hover:text-indigo-500">
+                <i class="ph ph-question text-xl md:text-2xl"></i>
+            </button>
+            
+            <button id="mobile-exit-btn" onclick="confirmGiveUp()" class="hidden md:hidden p-2 text-slate-400 hover:text-red-500">
+                <i class="ph ph-arrow-u-up-left text-xl"></i>
+            </button>
+        </aside>
+
+        <main class="flex-grow h-full overflow-hidden relative flex flex-col w-full bg-[#f0f4f8]">
+            
+            <div id="level-select-screen" class="w-full h-full flex flex-col items-center justify-center p-4 overflow-y-auto">
+                <div class="max-w-sm w-full space-y-3">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800 font-heading">開始遊戲</h2>
+                        <p class="text-slate-400 text-xs mt-1">初始贈送 200 點數！</p>
                     </div>
 
-                    <div class="z-10 text-indigo-400 animate-pulse">
-                        <i class="ph-bold ph-arrow-right text-xl"></i>
-                    </div>
-
-                    <div class="flex items-center gap-2 z-10">
-                        <span id="target-word-display" class="font-mono font-bold text-indigo-700 text-xl tracking-widest"></span>
-                        <span id="target-emoji-display" class="text-2xl"></span>
-                    </div>
-                </div>
-                <div class="text-center mt-1">
-                    <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                        步數: <span id="step-count" class="text-indigo-600">0</span> / <span id="min-steps">--</span>
-                    </span>
-                </div>
-            </div>
-        </header>
-
-        <main id="main-scroll" class="flex-grow overflow-y-auto relative p-4 flex flex-col scroll-smooth">
-            
-            <div id="level-select-screen" class="flex flex-col gap-3 py-4">
-                <div class="bg-white p-5 rounded-2xl shadow-sm mb-2 text-center">
-                    <h2 class="text-2xl font-bold text-slate-800 font-heading">開始挑戰</h2>
-                    <p class="text-xs text-slate-400 mt-1">連結兩個單字，每次只改一個字！</p>
-                </div>
-                
-                <button onclick="startGame('easy')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-400 flex items-center gap-4 active:scale-95 transition">
-                    <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600"><i class="ph-fill ph-plant text-xl"></i></div>
-                    <div class="text-left"><div class="font-bold text-lg">簡單 (3字)</div></div>
-                </button>
-
-                <button onclick="startGame('medium')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-400 flex items-center gap-4 active:scale-95 transition">
-                    <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600"><i class="ph-fill ph-books text-xl"></i></div>
-                    <div class="text-left"><div class="font-bold text-lg">普通 (4字)</div></div>
-                </button>
-
-                <button onclick="startGame('hard')" class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-purple-400 flex items-center gap-4 active:scale-95 transition">
-                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600"><i class="ph-fill ph-brain text-xl"></i></div>
-                    <div class="text-left"><div class="font-bold text-lg">困難 (5字)</div></div>
-                </button>
-
-                <button onclick="toggleTutorial()" class="mt-4 text-center text-slate-400 text-xs flex items-center justify-center gap-1 py-2">
-                    <i class="ph-fill ph-info"></i> 規則說明
-                </button>
-            </div>
-
-            <div id="game-history" class="hidden flex-col gap-3 pb-4">
-                </div>
-            
-            <div class="h-4 shrink-0"></div> 
-        </main>
-
-        <footer id="action-zone" class="hidden bg-white border-t border-indigo-100 p-3 pb-safe-area shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-30">
-            
-            <div class="flex justify-center mb-2">
-                <div class="flex flex-col items-center">
-                    <div id="current-word-display" class="flex gap-1 font-mono text-2xl font-bold tracking-widest text-slate-800">
+                    <button onclick="startGame('easy')" class="w-full bg-white p-4 rounded-2xl shadow-sm border-2 border-transparent hover:border-green-400 transition flex items-center gap-4 group">
+                        <div class="bg-green-100 w-10 h-10 rounded-full flex items-center justify-center text-green-600 group-hover:scale-110 transition">
+                            <i class="ph-fill ph-plant text-xl"></i>
                         </div>
-                    <i class="ph-bold ph-caret-down text-indigo-300 mt-1 animate-bounce"></i>
+                        <div class="text-left">
+                            <h3 class="font-bold text-slate-700">新手 (3 字母)</h3>
+                            <p class="text-[10px] text-slate-400">簡單熱身</p>
+                        </div>
+                    </button>
+
+                    <button onclick="startGame('medium')" class="w-full bg-white p-4 rounded-2xl shadow-sm border-2 border-transparent hover:border-blue-400 transition flex items-center gap-4 group">
+                        <div class="bg-blue-100 w-10 h-10 rounded-full flex items-center justify-center text-blue-600 group-hover:scale-110 transition">
+                            <i class="ph-fill ph-books text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-slate-700">普通 (4 字母)</h3>
+                            <p class="text-[10px] text-slate-400">日常詞彙</p>
+                        </div>
+                    </button>
+
+                    <button onclick="startGame('hard')" class="w-full bg-white p-4 rounded-2xl shadow-sm border-2 border-transparent hover:border-purple-400 transition flex items-center gap-4 group">
+                        <div class="bg-purple-100 w-10 h-10 rounded-full flex items-center justify-center text-purple-600 group-hover:scale-110 transition">
+                            <i class="ph-fill ph-brain text-xl"></i>
+                        </div>
+                        <div class="text-left">
+                            <h3 class="font-bold text-slate-700">困難 (5 字母)</h3>
+                            <p class="text-[10px] text-slate-400">燒腦挑戰</p>
+                        </div>
+                    </button>
                 </div>
             </div>
 
-            <div class="relative flex gap-2 h-14">
-                <button onclick="getHint()" class="w-12 h-full rounded-xl border border-yellow-200 bg-yellow-50 text-yellow-600 flex flex-col items-center justify-center active:scale-95 transition">
-                    <i class="ph-fill ph-lightbulb text-xl"></i>
-                    <span class="text-[9px] font-bold leading-none">-50</span>
-                </button>
+            <div id="game-screen" class="hidden flex-col h-full w-full max-w-md mx-auto p-4">
+                
+                <div class="flex justify-between items-end mb-2 px-1">
+                    <button onclick="confirmGiveUp()" class="hidden md:flex text-xs font-bold text-slate-400 hover:text-red-500 items-center gap-1 transition">
+                        <i class="ph-bold ph-arrow-left"></i> 返回
+                    </button>
+                    <div class="md:hidden"></div> 
 
-                <input type="text" id="next-word-input" 
-                    class="flex-1 h-full text-center text-xl font-bold font-mono tracking-[0.2em] border-2 border-indigo-200 rounded-xl focus:outline-none focus:border-indigo-500 focus:shadow-md uppercase placeholder-slate-300 bg-white"
-                    placeholder="輸入單字" autocomplete="off" spellcheck="false">
+                    <div class="text-[10px] font-bold text-slate-400 bg-white border border-slate-200 px-3 py-1 rounded-full">
+                        MOVES: <span id="move-count" class="text-indigo-600 text-sm">0</span> / <span id="target-moves">--</span>
+                    </div>
+                </div>
 
-                <button onclick="submitWord()" class="w-14 h-full bg-indigo-600 text-white rounded-xl shadow-md active:scale-95 transition flex items-center justify-center">
-                    <i class="ph-bold ph-arrow-return-left text-xl"></i>
-                </button>
-            </div>
-            <div class="absolute top-1 right-3 left-3 flex justify-center pointer-events-none">
-                <div id="error-msg" class="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg opacity-0 transition-opacity flex items-center gap-1 translate-y-[-10px]">
-                    <i class="ph-bold ph-warning-circle"></i> <span>Error</span>
+                <div class="flex-grow flex flex-col gap-2 overflow-hidden relative">
+                    
+                    <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 border-slate-700 flex items-center justify-between shrink-0 h-[60px]">
+                        <div class="flex items-center gap-3">
+                            <span id="start-emoji" class="text-2xl"></span>
+                            <span id="start-word" class="font-mono text-xl font-bold tracking-[0.15em] text-slate-700"></span>
+                        </div>
+                        <i class="ph-fill ph-check-circle text-green-500"></i>
+                    </div>
+
+                    <div id="user-words" class="flex-grow overflow-y-auto min-h-[50px] flex flex-col gap-2 py-1 px-1 scroll-smooth">
+                        </div>
+
+                    <div class="shrink-0 pt-2 bg-[#f0f4f8] z-10">
+                        <div class="relative group">
+                            <input type="text" id="next-word-input" 
+                                class="w-full h-[60px] pl-14 pr-14 text-center text-xl font-bold font-mono tracking-[0.2em] border-2 border-indigo-200 rounded-2xl focus:outline-none focus:border-indigo-500 focus:shadow-lg uppercase placeholder-slate-300 transition-all shadow-sm bg-white"
+                                placeholder="NEXT" maxlength="5" autocomplete="off" spellcheck="false">
+                            
+                            <button onclick="getHint()" class="absolute left-2 top-2 bottom-2 w-10 flex flex-col items-center justify-center rounded-xl hover:bg-yellow-50 active:scale-95 transition border border-transparent hover:border-yellow-200">
+                                <i class="ph-fill ph-lightbulb text-yellow-400 text-lg"></i>
+                                <span class="text-[8px] font-bold text-yellow-600">-50</span>
+                            </button>
+
+                            <button onclick="submitWord()" class="absolute right-2 top-2 bottom-2 aspect-square bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 active:scale-95 transition shadow-sm flex items-center justify-center">
+                                <i class="ph-bold ph-arrow-right text-lg"></i>
+                            </button>
+                        </div>
+                        
+                        <div id="error-msg" class="h-6 flex items-center justify-center text-red-500 text-[10px] font-bold opacity-0 transition-opacity">
+                            <i class="ph-bold ph-warning-circle mr-1"></i>
+                            <span>Error Text</span>
+                        </div>
+
+                        <div class="bg-indigo-600 p-3 rounded-xl shadow-md border-l-4 border-indigo-800 flex items-center justify-between h-[60px] text-white mt-0 relative overflow-hidden">
+                            <div class="flex items-center gap-3 relative z-10">
+                                <span id="end-emoji" class="text-2xl"></span>
+                                <span id="end-word" class="font-mono text-xl font-bold tracking-[0.15em]"></span>
+                            </div>
+                            <div class="text-[9px] font-bold bg-indigo-800 px-2 py-0.5 rounded opacity-60">TARGET</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </footer>
-
+        </main>
     </div>
 
     <div id="win-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-center items-center p-6 backdrop-blur-sm">
         <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center relative pop-in">
-            <div class="w-20 h-20 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-lg mx-auto -mt-14 mb-4 animate-float">
-                <i class="ph-fill ph-crown text-4xl text-white"></i>
+            <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-white shadow-lg mx-auto -mt-12 mb-4 animate-float">
+                <i class="ph-fill ph-crown text-3xl text-white"></i>
             </div>
-            <h2 class="text-2xl font-bold text-slate-800 font-heading">Level Complete!</h2>
-            <div class="text-sm text-slate-400 mb-4">Total Steps: <span id="win-steps" class="font-bold text-indigo-600 text-lg">0</span></div>
+            <h2 class="text-2xl font-bold text-slate-800 font-heading">過關！</h2>
+            <div class="text-sm text-slate-400 mb-6">本次步數: <span id="win-steps" class="font-bold text-indigo-600 text-lg">0</span></div>
             
             <div id="reward-display" class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 mb-6 hidden">
-                <p class="text-[10px] font-bold text-indigo-400 uppercase">New Item Unlocked!</p>
-                <div class="text-5xl animate-bounce my-2" id="reward-icon">🎁</div>
-                <p class="text-base font-bold text-indigo-900" id="reward-name">Name</p>
+                <p class="text-[10px] font-bold text-indigo-400 uppercase">獲得新獎品</p>
+                <div class="text-4xl animate-bounce my-2" id="reward-icon">🎁</div>
+                <p class="text-sm font-bold text-indigo-900" id="reward-name">Name</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="closeWinModal()" class="py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200">選單</button>
+                <button onclick="closeWinModal()" class="py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200">主選單</button>
                 <button onclick="nextLevel()" class="py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-200">下一關</button>
             </div>
         </div>
     </div>
 
     <div id="prizes-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center p-6 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl relative animate-pop flex flex-col max-h-[70vh]">
+        <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl relative animate-pop flex flex-col max-h-[80vh]">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-slate-800">🏆 收藏庫</h2>
+                <h2 class="text-lg font-bold text-slate-800">🏆 我的收藏</h2>
                 <button onclick="togglePrizes()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"><i class="ph-bold ph-x"></i></button>
             </div>
-            <div id="prizes-grid" class="grid grid-cols-4 gap-3 overflow-y-auto p-1"></div>
-            <p id="no-prizes-msg" class="text-center text-slate-400 text-xs py-8 hidden">加油，通關獲得獎品！</p>
+            <div id="prizes-grid" class="grid grid-cols-4 gap-3 overflow-y-auto p-1">
+                </div>
+            <p id="no-prizes-msg" class="text-center text-slate-400 text-xs py-8 hidden">還沒有獎品，快去通關！</p>
         </div>
     </div>
 
     <div id="tutorial-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-center items-center p-6 backdrop-blur-sm">
         <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl relative animate-pop">
-            <h2 class="text-xl font-bold text-slate-800 mb-4 text-center">玩法說明</h2>
+             <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold text-slate-800">📖 玩法說明</h2>
+                <button onclick="toggleTutorial()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200"><i class="ph-bold ph-x"></i></button>
+            </div>
             <div class="space-y-4 text-sm text-slate-600">
                 <p>1. 每次只能改變單字中的 <b class="text-indigo-600">一個字母</b>。</p>
-                <p>2. <span class="bg-green-100 text-green-700 font-bold px-1 rounded">綠色背景</span> 代表該字母與目標單字 <b class="text-green-600">位置一致</b> (正確)。</p>
-                <div class="bg-slate-50 p-3 rounded-xl text-center font-mono text-xs border border-slate-200">
-                    目標: <b class="text-slate-800">POT</b><br><br>
-                    <span class="text-slate-400">輸入</span> <b class="text-green-600 bg-green-100 rounded px-1">P</b>EA <br>
-                    <span class="text-[10px] text-slate-400">(P 正確，變成綠色)</span>
+                <div class="bg-slate-50 p-2 rounded-lg text-center font-mono text-xs">
+                    CAT <i class="ph-bold ph-arrow-right mx-1"></i> <b class="text-green-600">B</b>AT <i class="ph-bold ph-arrow-right mx-1"></i> B<b class="text-green-600">E</b>T
                 </div>
+                <p>2. 變出字典裡有的字，最終變成目標單字！</p>
             </div>
-            <button onclick="toggleTutorial()" class="w-full mt-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg">知道了</button>
+            <button onclick="toggleTutorial()" class="w-full mt-6 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-indigo-200">開始玩</button>
         </div>
     </div>
 
     <div id="solution-modal" class="fixed inset-0 bg-black/70 z-50 hidden flex justify-center items-center p-6 backdrop-blur-md">
         <div class="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl flex flex-col max-h-[70vh] pop-in">
-            <h3 class="text-lg font-bold text-indigo-600 text-center mb-3">最佳路徑解答</h3>
+            <h3 class="text-lg font-bold text-indigo-600 text-center mb-3">最佳路徑</h3>
             <div id="solution-path" class="flex-grow overflow-y-auto flex flex-col gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-sm"></div>
             <button onclick="returnToMenu()" class="mt-3 w-full py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm">回到選單</button>
         </div>
@@ -222,7 +249,7 @@
     <div id="giveup-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-center items-center p-6 backdrop-blur-sm">
         <div class="bg-white w-full max-w-xs rounded-3xl p-6 shadow-2xl text-center pop-in">
             <h3 class="text-lg font-bold text-slate-800 mb-2">放棄挑戰？</h3>
-            <p class="text-xs text-slate-400 mb-6">將會直接顯示正確答案。</p>
+            <p class="text-xs text-slate-400 mb-6">將顯示正確答案的路徑。</p>
             <div class="flex gap-3">
                 <button onclick="document.getElementById('giveup-modal').classList.add('hidden')" class="flex-1 py-3 bg-slate-100 rounded-xl font-bold text-slate-600 text-xs">取消</button>
                 <button onclick="processGiveUp()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold text-xs shadow-md shadow-red-200">顯示答案</button>
@@ -230,19 +257,19 @@
         </div>
     </div>
 
-    <div id="toast" class="fixed top-12 left-1/2 transform -translate-x-1/2 bg-slate-800/90 backdrop-blur text-white px-4 py-2 rounded-full shadow-xl z-[70] flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
+    <div id="toast" class="fixed top-16 md:top-10 left-1/2 transform -translate-x-1/2 bg-slate-800/90 backdrop-blur text-white px-4 py-2 rounded-full shadow-xl z-[60] flex items-center gap-2 transition-all duration-300 opacity-0 translate-y-[-20px] pointer-events-none">
         <i id="toast-icon" class="ph-fill ph-info text-lg"></i>
         <span id="toast-msg" class="font-bold text-xs">Notification</span>
     </div>
 
     <script>
-        // --- DATA & CONFIG ---
+        // --- DATA ---
         const FALLBACK_LEVELS = {
-            "easy": [{ "start": "tea", "end": "pot", "startEmoji": "🍵", "endEmoji": "🫖", "minSteps": 3 }],
+            "easy": [{ "start": "cat", "end": "dog", "startEmoji": "🐱", "endEmoji": "🐶", "minSteps": 3 }],
             "medium": [{ "start": "fish", "end": "bird", "startEmoji": "🐟", "endEmoji": "🐦", "minSteps": 4 }],
             "hard": [{ "start": "stone", "end": "money", "startEmoji": "🪨", "endEmoji": "💰", "minSteps": 6 }]
         };
-        const FALLBACK_DICT = ["tea","pea","pet","pot","fish","wish","wash","bash","base","bare","bard","bird","stone","shone","phone","phoney","money"];
+        const FALLBACK_DICT = ["cat", "cot", "dot", "dog", "cog", "fish", "wish", "wash", "bash", "base", "bare", "bard", "bird", "stone", "shone", "phone", "phoney", "money"];
 
         let commonWords = new Set();
         let levelsData = {};
@@ -265,6 +292,7 @@
                 document.getElementById('loading-screen').classList.add('opacity-0');
                 setTimeout(() => document.getElementById('loading-screen').remove(), 500);
             } catch (err) {
+                console.warn("Load error, using fallback");
                 commonWords = new Set(FALLBACK_DICT);
                 levelsData = FALLBACK_LEVELS;
                 isDataLoaded = true;
@@ -281,6 +309,7 @@
         let score = 200;
         let unlockedPrizes = [];
         const HINT_COST = 50;
+        const INITIAL_SCORE = 200;
 
         const prizesList = [
             { id: 'p1', icon: '🍎', name: '蘋果' }, { id: 'p2', icon: '🚗', name: '跑車' },
@@ -288,18 +317,13 @@
             { id: 'p5', icon: '💎', name: '鑽石' }, { id: 'p6', icon: '🏰', name: '城堡' },
             { id: 'p7', icon: '🍔', name: '漢堡' }, { id: 'p8', icon: '🪐', name: '星球' },
             { id: 'p9', icon: '🎮', name: '電動' }, { id: 'p10', icon: '🦖', name: '恐龍' },
-            { id: 'p11', icon: '🐱', name: '小貓' }, { id: 'p12', icon: '🍦', name: '冰淇淋' },
-            { id: 'p13', icon: '🦄', name: '獨角獸' }, { id: 'p14', icon: '🌈', name: '彩虹' },
-            { id: 'p15', icon: '⚽', name: '足球' }, { id: 'p16', icon: '👑', name: '皇冠' }
+            { id: 'p11', icon: '🐱', name: '小貓' }, { id: 'p12', icon: '🍦', name: '冰淇淋' }
         ];
 
         window.onload = () => {
             loadProgress();
             renderPrizes();
             loadData();
-            // 手機上防止鍵盤彈起遮擋
-            const viewport = document.querySelector('meta[name=viewport]');
-            viewport.setAttribute('content', viewport.content + ', height=' + window.innerHeight);
         };
 
         // --- GAMEPLAY ---
@@ -314,13 +338,10 @@
             commonWords.add(currentLevelData.end);
 
             resetGame();
-            
             document.getElementById('level-select-screen').classList.add('hidden');
-            document.getElementById('back-btn').classList.remove('hidden');
-            document.getElementById('goal-bar').classList.remove('hidden');
-            document.getElementById('game-history').classList.remove('hidden');
-            document.getElementById('game-history').classList.add('flex');
-            document.getElementById('action-zone').classList.remove('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('flex');
+            document.getElementById('mobile-exit-btn').classList.remove('hidden');
         }
 
         function resetGame() {
@@ -328,26 +349,16 @@
             stepsTaken = 0;
             userPath = [];
             
-            // Header Info
-            document.getElementById('start-word-display').textContent = currentLevelData.start.toUpperCase();
-            document.getElementById('start-emoji-display').textContent = currentLevelData.startEmoji || '❓';
-            document.getElementById('target-word-display').textContent = currentLevelData.end.toUpperCase();
-            document.getElementById('target-emoji-display').textContent = currentLevelData.endEmoji || '❓';
-            document.getElementById('step-count').textContent = '0';
-            document.getElementById('min-steps').textContent = currentLevelData.minSteps;
-            document.getElementById('progress-bg').style.width = '0%';
-
-            // Clear History
-            const history = document.getElementById('game-history');
-            history.innerHTML = `
-                <div class="flex items-center justify-center gap-2 opacity-50 mb-2">
-                    <span class="text-2xl">${currentLevelData.startEmoji}</span>
-                    <span class="font-mono font-bold text-lg">${currentLevelData.start.toUpperCase()}</span>
-                </div>
-                <div class="flex justify-center text-slate-300"><i class="ph-bold ph-arrow-down"></i></div>
-            `;
-
-            updateCurrentWordDisplay(); // Initialize styling
+            document.getElementById('start-word').textContent = currentLevelData.start.toUpperCase();
+            document.getElementById('end-word').textContent = currentLevelData.end.toUpperCase();
+            document.getElementById('start-emoji').textContent = currentLevelData.startEmoji || '❓';
+            document.getElementById('end-emoji').textContent = currentLevelData.endEmoji || '❓';
+            
+            document.getElementById('move-count').textContent = '0';
+            document.getElementById('target-moves').textContent = currentLevelData.minSteps;
+            
+            const container = document.getElementById('user-words');
+            container.innerHTML = '';
 
             const input = document.getElementById('next-word-input');
             input.value = '';
@@ -356,34 +367,14 @@
             setTimeout(() => input.focus(), 100);
         }
 
-        // 核心功能：渲染帶有顏色的當前單字
-        function updateCurrentWordDisplay() {
-            const container = document.getElementById('current-word-display');
-            const target = currentLevelData.end;
-            let html = "";
-            
-            for(let i=0; i<currentWord.length; i++) {
-                const char = currentWord[i];
-                // 如果字母與目標相同 -> 綠色背景
-                if(char === target[i]) {
-                    html += `<div class="w-8 h-10 flex items-center justify-center bg-green-100 text-green-600 rounded-lg border border-green-200 shadow-sm transition-all">${char.toUpperCase()}</div>`;
-                } else {
-                    html += `<div class="w-8 h-10 flex items-center justify-center bg-slate-100 text-slate-500 rounded-lg border border-slate-200">${char.toUpperCase()}</div>`;
-                }
-            }
-            container.innerHTML = html;
-        }
-
         function returnToMenu() {
             document.querySelectorAll('.fixed').forEach(el => {
                 if(el.id !== 'toast') el.classList.add('hidden');
             });
-            document.getElementById('back-btn').classList.add('hidden');
-            document.getElementById('goal-bar').classList.add('hidden');
-            document.getElementById('game-history').classList.add('hidden');
-            document.getElementById('game-history').classList.remove('flex');
-            document.getElementById('action-zone').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('flex');
             document.getElementById('level-select-screen').classList.remove('hidden');
+            document.getElementById('mobile-exit-btn').classList.add('hidden');
         }
 
         function submitWord() {
@@ -395,12 +386,13 @@
             if (val === currentWord) return showError("請改變一個字母");
             if (!commonWords.has(val) && val !== currentLevelData.end) return showError("字典無此字");
             
+            // Diff check
             let diff = 0;
             for(let i=0; i<startLen; i++) if(val[i] !== currentWord[i]) diff++;
             if (diff !== 1) return showError("只能改一個字");
             if (userPath.includes(val) || val === currentLevelData.start) return showError("重複了");
 
-            addWordToHistory(val);
+            addWordCard(val);
             input.value = '';
             input.focus();
 
@@ -411,73 +403,48 @@
             if (e.key === 'Enter') submitWord();
         });
 
-        function addWordToHistory(word) {
+        function addWordCard(word) {
             const prev = currentWord;
             currentWord = word;
             stepsTaken++;
             userPath.push(word);
-            
-            document.getElementById('step-count').textContent = stepsTaken;
+            document.getElementById('move-count').textContent = stepsTaken;
 
-            // Render History Item (Card)
             const div = document.createElement('div');
-            div.className = "bg-white border border-slate-200 p-3 rounded-xl shadow-sm flex items-center justify-center gap-1 pop-in";
+            div.className = "bg-white border border-slate-200 p-2 rounded-lg text-center font-mono text-lg font-bold tracking-[0.2em] text-slate-600 pop-in flex items-center justify-center shrink-0 h-[50px] shadow-sm";
             
-            const target = currentLevelData.end;
             let html = "";
             for(let i=0; i<word.length; i++) {
-                const char = word[i];
-                // Logic: 
-                // 1. Match Target (Green) - Priority
-                // 2. Changed from prev (Blue/Bold)
-                if (char === target[i]) {
-                     html += `<span class="w-7 h-8 flex items-center justify-center bg-green-100 text-green-700 font-bold rounded">${char.toUpperCase()}</span>`;
-                } else if (char !== prev[i]) {
-                     html += `<span class="w-7 h-8 flex items-center justify-center text-indigo-600 font-bold border-b-2 border-indigo-200">${char.toUpperCase()}</span>`;
-                } else {
-                     html += `<span class="w-7 h-8 flex items-center justify-center text-slate-400 font-medium">${char.toUpperCase()}</span>`;
-                }
+                if(word[i] !== prev[i]) html += `<span class="text-indigo-600 font-extrabold bg-indigo-50 px-1 rounded">${word[i].toUpperCase()}</span>`;
+                else html += word[i].toUpperCase();
             }
             div.innerHTML = html;
             
-            const history = document.getElementById('game-history');
-            history.appendChild(div);
-            history.appendChild(document.createRange().createContextualFragment('<div class="flex justify-center text-slate-300 text-xs"><i class="ph-bold ph-arrow-down"></i></div>'));
-            
-            // Scroll
-            const mainScroll = document.getElementById('main-scroll');
-            mainScroll.scrollTop = mainScroll.scrollHeight;
-
-            // Update fixed display
-            updateCurrentWordDisplay();
+            const container = document.getElementById('user-words');
+            container.appendChild(div);
+            // Auto scroll to bottom
+            container.scrollTop = container.scrollHeight;
         }
 
         function showError(msg) {
             const el = document.getElementById('error-msg');
-            const box = document.getElementById('next-word-input');
             el.querySelector('span').textContent = msg;
-            
-            el.classList.remove('opacity-0', 'translate-y-[-10px]');
-            el.classList.add('translate-y-[-40px]'); // Move up above input
-            
-            box.classList.add('shake-anim', 'border-red-400');
-            setTimeout(() => box.classList.remove('shake-anim', 'border-red-400'), 400);
-            
-            setTimeout(() => {
-                el.classList.add('opacity-0', 'translate-y-[-10px]');
-                el.classList.remove('translate-y-[-40px]');
-            }, 2000);
+            el.classList.remove('opacity-0');
+            document.getElementById('next-word-input').classList.add('shake-anim');
+            setTimeout(() => document.getElementById('next-word-input').classList.remove('shake-anim'), 400);
+            setTimeout(() => el.classList.add('opacity-0'), 2000);
         }
 
         function getHint() {
             if (score < HINT_COST) return showToast(`點數不足 (需 ${HINT_COST})`, "ph-warning");
             
-            if(!commonWords.has(currentWord)) commonWords.add(currentWord);
-
+            // Simple Solver BFS
             let queue = [[currentWord]];
             let visited = new Set([currentWord]);
             const target = currentLevelData.end;
             let foundPath = null;
+
+            if(!commonWords.has(currentWord)) commonWords.add(currentWord);
 
             while(queue.length > 0 && !foundPath) {
                 let path = queue.shift();
@@ -496,7 +463,7 @@
             }
 
             if(!foundPath) {
-                showToast("前方無路，請刪除上一步", "ph-prohibit");
+                showToast("此路不通，請刪除上一步", "ph-prohibit");
                 return;
             }
 
@@ -516,7 +483,7 @@
             score += Math.max(10, base - (extra * 10));
 
             let newPrize = null;
-            if(Math.random() > 0.4 && unlockedPrizes.length < prizesList.length) {
+            if(Math.random() > 0.5 && unlockedPrizes.length < prizesList.length) {
                 const available = prizesList.filter(p => !unlockedPrizes.includes(p.id));
                 if(available.length) {
                     newPrize = available[Math.floor(Math.random()*available.length)];
@@ -526,11 +493,9 @@
             }
             saveProgress();
             renderPrizes();
-            confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+            confetti({ particleCount: 150, spread: 60, origin: { y: 0.6 } });
 
             document.getElementById('win-steps').textContent = stepsTaken;
-            document.getElementById('progress-bg').style.width = '100%';
-            
             const rewardDiv = document.getElementById('reward-display');
             if(newPrize) {
                 rewardDiv.classList.remove('hidden');
@@ -540,10 +505,8 @@
                 rewardDiv.classList.add('hidden');
             }
             
-            setTimeout(() => {
-                document.getElementById('win-modal').classList.remove('hidden');
-                document.getElementById('win-modal').classList.add('flex');
-            }, 500);
+            document.getElementById('win-modal').classList.remove('hidden');
+            document.getElementById('win-modal').classList.add('flex');
         }
 
         // --- UTILS ---
@@ -569,7 +532,7 @@
             unlockedPrizes.forEach(id => {
                 const p = prizesList.find(x => x.id === id);
                 if(p) {
-                    c.innerHTML += `<div class="aspect-square bg-indigo-50 rounded-xl flex flex-col items-center justify-center border border-indigo-100 shadow-sm"><div class="text-2xl">${p.icon}</div></div>`;
+                    c.innerHTML += `<div class="aspect-square bg-indigo-50 rounded-xl flex flex-col items-center justify-center border border-indigo-100"><div class="text-2xl">${p.icon}</div></div>`;
                 }
             });
         }
@@ -590,11 +553,12 @@
 
         function processGiveUp() {
             document.getElementById('giveup-modal').classList.add('hidden');
+            // Show start -> end solution
             let queue = [[currentLevelData.start]];
             let visited = new Set([currentLevelData.start]);
             let found = null;
             if(!commonWords.has(currentLevelData.start)) commonWords.add(currentLevelData.start);
-            
+
             while(queue.length) {
                 let p = queue.shift();
                 let last = p[p.length-1];
@@ -614,7 +578,7 @@
             if(found) {
                 found.forEach((w, i) => {
                     let icon = i===0 ? '🏁' : (i===found.length-1 ? '🎉' : '⬇️');
-                    div.innerHTML += `<div class="flex items-center gap-4 border-b border-slate-100 p-2"><span class="w-6 text-center">${icon}</span><span class="font-bold font-mono uppercase text-slate-600 tracking-wider">${w}</span></div>`;
+                    div.innerHTML += `<div class="flex items-center gap-3 border-b border-slate-100 p-2"><span class="w-6 text-center">${icon}</span><span class="font-bold font-mono uppercase text-slate-600">${w}</span></div>`;
                 });
             } else {
                 div.innerHTML = '<div class="text-center text-red-400 p-4">無解 (字典缺字)</div>';
@@ -637,6 +601,7 @@
             returnToMenu();
         }
 
+        // --- SAVE/LOAD ---
         function saveProgress() {
             localStorage.setItem('wordLadderData_v3', JSON.stringify({ score, prizes: unlockedPrizes }));
             document.getElementById('score-display').textContent = score;
@@ -646,10 +611,10 @@
             const data = localStorage.getItem('wordLadderData_v3');
             if (data) {
                 const parsed = JSON.parse(data);
-                score = parsed.score !== undefined ? parsed.score : 200;
+                score = parsed.score !== undefined ? parsed.score : INITIAL_SCORE;
                 unlockedPrizes = parsed.prizes || [];
             } else {
-                score = 200;
+                score = INITIAL_SCORE;
                 saveProgress();
             }
             document.getElementById('score-display').textContent = score;
