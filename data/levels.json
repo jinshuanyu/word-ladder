@@ -1,38 +1,134 @@
 {
   "easy": [
-      { "start": "cat", "end": "dog", "minSteps": 3, "startEmoji": "🐱", "endEmoji": "🐶" },
-      { "start": "pig", "end": "sty", "minSteps": 4, "startEmoji": "🐷", "endEmoji": "🏚️" },
-      { "start": "eye", "end": "lid", "minSteps": 3, "startEmoji": "👁️", "endEmoji": "😌" },
-      { "start": "tea", "end": "pot", "minSteps": 4, "startEmoji": "🍵", "endEmoji": "🫖" },
-      { "start": "sun", "end": "ice", "minSteps": 4, "startEmoji": "☀️", "endEmoji": "🧊" },
-      { "start": "run", "end": "fly", "minSteps": 4, "startEmoji": "🏃", "endEmoji": "🪰" },
-      { "start": "wet", "end": "dry", "minSteps": 3, "startEmoji": "💧", "endEmoji": "🌵" },
-      { "start": "hot", "end": "ice", "minSteps": 4, "startEmoji": "🔥", "endEmoji": "🧊" },
-      { "start": "boy", "end": "man", "minSteps": 3, "startEmoji": "👦", "endEmoji": "👨" },
-      { "start": "ape", "end": "man", "minSteps": 5, "startEmoji": "🦍", "endEmoji": "👨" }
+    {
+      "start": "cat",
+      "end": "dog",
+      "minSteps": 3,
+      "startEmoji": "🐱",
+      "endEmoji": "🐶"
+    },
+    {
+      "start": "pig",
+      "end": "sty",
+      "minSteps": 4,
+      "startEmoji": "🐷",
+      "endEmoji": "🏚️"
+    },
+    {
+      "start": "eye",
+      "end": "lid",
+      "minSteps": 3,
+      "startEmoji": "👁️",
+      "endEmoji": "😌"
+    },
+    {
+      "start": "tea",
+      "end": "pot",
+      "minSteps": 4,
+      "startEmoji": "🍵",
+      "endEmoji": "🫖"
+    },
+    {
+      "start": "run",
+      "end": "fly",
+      "minSteps": 4,
+      "startEmoji": "🏃",
+      "endEmoji": "🪰"
+    },
+    {
+      "start": "wet",
+      "end": "dry",
+      "minSteps": 3,
+      "startEmoji": "💧",
+      "endEmoji": "🌵"
+    },
+    {
+      "start": "boy",
+      "end": "man",
+      "minSteps": 3,
+      "startEmoji": "👦",
+      "endEmoji": "👨"
+    },
+    {
+      "start": "ape",
+      "end": "man",
+      "minSteps": 5,
+      "startEmoji": "🦍",
+      "endEmoji": "👨"
+    }
   ],
   "medium": [
-      { "start": "cold", "end": "warm", "minSteps": 4, "startEmoji": "🥶", "endEmoji": "🥵" },
-      { "start": "ship", "end": "boat", "minSteps": 5, "startEmoji": "🚢", "endEmoji": "🛶" },
-      { "start": "tree", "end": "leaf", "minSteps": 6, "startEmoji": "🌳", "endEmoji": "🍃" },
-      { "start": "foot", "end": "head", "minSteps": 4, "startEmoji": "🦶", "endEmoji": "🗣️" },
-      { "start": "lion", "end": "bear", "minSteps": 5, "startEmoji": "🦁", "endEmoji": "🐻" },
-      { "start": "moon", "end": "wolf", "minSteps": 5, "startEmoji": "🌙", "endEmoji": "🐺" },
-      { "start": "fish", "end": "swim", "minSteps": 5, "startEmoji": "🐟", "endEmoji": "🏊" },
-      { "start": "dark", "end": "lamp", "minSteps": 5, "startEmoji": "🌑", "endEmoji": "💡" },
-      { "start": "hate", "end": "love", "minSteps": 4, "startEmoji": "💔", "endEmoji": "❤️" },
-      { "start": "sick", "end": "well", "minSteps": 5, "startEmoji": "🤢", "endEmoji": "🏥" }
+    {
+      "start": "cold",
+      "end": "warm",
+      "minSteps": 4,
+      "startEmoji": "🥶",
+      "endEmoji": "🥵"
+    },
+    {
+      "start": "ship",
+      "end": "boat",
+      "minSteps": 5,
+      "startEmoji": "🚢",
+      "endEmoji": "🛶"
+    },
+    {
+      "start": "tree",
+      "end": "leaf",
+      "minSteps": 6,
+      "startEmoji": "🌳",
+      "endEmoji": "🍃"
+    },
+    {
+      "start": "foot",
+      "end": "head",
+      "minSteps": 4,
+      "startEmoji": "🦶",
+      "endEmoji": "🗣️"
+    },
+    {
+      "start": "moon",
+      "end": "wolf",
+      "minSteps": 5,
+      "startEmoji": "🌙",
+      "endEmoji": "🐺"
+    },
+    {
+      "start": "fish",
+      "end": "swim",
+      "minSteps": 5,
+      "startEmoji": "🐟",
+      "endEmoji": "🏊"
+    },
+    {
+      "start": "dark",
+      "end": "lamp",
+      "minSteps": 5,
+      "startEmoji": "🌑",
+      "endEmoji": "💡"
+    },
+    {
+      "start": "hate",
+      "end": "love",
+      "minSteps": 4,
+      "startEmoji": "💔",
+      "endEmoji": "❤️"
+    },
+    {
+      "start": "sick",
+      "end": "well",
+      "minSteps": 5,
+      "startEmoji": "🤢",
+      "endEmoji": "🏥"
+    }
   ],
   "hard": [
-      { "start": "wheat", "end": "bread", "minSteps": 6, "startEmoji": "🌾", "endEmoji": "🍞" },
-      { "start": "sleep", "end": "dream", "minSteps": 6, "startEmoji": "🛌", "endEmoji": "💭" },
-      { "start": "black", "end": "white", "minSteps": 7, "startEmoji": "⚫", "endEmoji": "⚪" },
-      { "start": "stone", "end": "money", "minSteps": 6, "startEmoji": "🪨", "endEmoji": "💰" },
-      { "start": "small", "end": "giant", "minSteps": 6, "startEmoji": "🐜", "endEmoji": "🦖" },
-      { "start": "apple", "end": "grape", "minSteps": 6, "startEmoji": "🍎", "endEmoji": "🍇" },
-      { "start": "river", "end": "ocean", "minSteps": 8, "startEmoji": "🏞️", "endEmoji": "🌊" },
-      { "start": "grass", "end": "green", "minSteps": 6, "startEmoji": "🌱", "endEmoji": "🟩" },
-      { "start": "peace", "end": "fight", "minSteps": 7, "startEmoji": "🕊️", "endEmoji": "🥊" },
-      { "start": "water", "end": "drink", "minSteps": 7, "startEmoji": "💧", "endEmoji": "🥤" }
+    {
+      "start": "black",
+      "end": "white",
+      "minSteps": 7,
+      "startEmoji": "⚫",
+      "endEmoji": "⚪"
+    }
   ]
 }
