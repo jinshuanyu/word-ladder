@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Ladder Quest v3.4 (Reset Feature)</title>
+    <title>Word Ladder Quest v3.4.2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -69,7 +69,7 @@
                 <p class="text-[9px] font-bold text-orange-400 uppercase tracking-wider mb-1">POINTS</p>
                 <div class="flex items-center gap-1">
                     <i class="ph-fill ph-coin text-orange-500 text-sm"></i>
-                    <p class="text-xl font-bold text-orange-600 leading-none" id="score-display">0</p>
+                    <p class="text-xl font-bold text-orange-600 leading-none" id="score-display">200</p>
                 </div>
             </div>
 
@@ -81,7 +81,7 @@
                 <p class="text-[9px] font-bold text-yellow-600 uppercase tracking-wider mt-1">PRIZES</p>
             </button>
 
-            <button id="sidebar-back-btn" onclick="confirmGiveUp()" class="hidden md:flex bg-white p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition text-slate-400 hover:text-red-400 flex-col items-center">
+            <button id="sidebar-back-btn" onclick="confirmGiveUp()" class="hidden bg-white p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition text-slate-400 hover:text-red-400 flex-col items-center">
                 <i class="ph ph-flag text-xl"></i>
                 <p class="text-[9px] font-bold mt-1">GIVE UP</p>
             </button>
@@ -337,9 +337,10 @@
         let currentWord = "";
         let stepsTaken = 0;
         let userPath = [];
-        let score = 0;
+        let score = 200;
         let unlockedPrizes = [];
         const HINT_COST = 50;
+        const INITIAL_SCORE = 200;
 
         const prizesList = [
             { id: 'p1', icon: '🍎', name: '蘋果', desc: '健康' },
@@ -386,8 +387,10 @@
             document.getElementById('level-select-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('game-screen').classList.add('flex');
-            document.getElementById('sidebar-back-btn').classList.remove('hidden');
-            document.getElementById('sidebar-back-btn').classList.add('flex');
+            
+            // SHOW sidebar button only on Desktop
+            const sbBtn = document.getElementById('sidebar-back-btn');
+            sbBtn.classList.add('md:flex'); // Add desktop visibility
         }
 
         function resetGame() {
@@ -425,8 +428,10 @@
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('flex');
             document.getElementById('level-select-screen').classList.remove('hidden');
-            document.getElementById('sidebar-back-btn').classList.add('hidden');
-            document.getElementById('sidebar-back-btn').classList.remove('flex');
+            
+            // HIDE sidebar button
+            const sbBtn = document.getElementById('sidebar-back-btn');
+            sbBtn.classList.remove('md:flex');
         }
 
         function isOneLetterDifferent(word1, word2) {
@@ -532,25 +537,18 @@
         // --- UNDO FUNCTION ---
         function undoLastMove() {
             if (userPath.length === 0) return;
-
-            // 1. Remove logic
             userPath.pop();
             stepsTaken--;
 
-            // 2. Remove DOM
             const container = document.getElementById('user-words');
-            if (container.lastChild) {
-                container.removeChild(container.lastChild);
-            }
+            if (container.lastChild) container.removeChild(container.lastChild);
 
-            // 3. Reset state
             if (userPath.length > 0) {
                 currentWord = userPath[userPath.length - 1];
             } else {
                 currentWord = currentLevelData.start;
-                document.getElementById('undo-btn').disabled = true; // Disable if back to start
+                document.getElementById('undo-btn').disabled = true;
             }
-
             updateStatus();
             showToast("已復原一步", "ph-arrow-u-up-left");
         }
@@ -568,16 +566,13 @@
                 return;
             }
 
-            if (!commonWords.has(currentWord)) {
-                commonWords.add(currentWord);
-            }
+            if (!commonWords.has(currentWord)) commonWords.add(currentWord);
 
             const path = solveLadder(currentWord, currentLevelData.end);
             
             if (!path) {
                  showToast("前方無路！請按 UNDO 後退", "ph-prohibit");
                  showError("死胡同！無法到達終點");
-                 // Hint visual cue to undo button
                  const undoBtn = document.getElementById('undo-btn');
                  undoBtn.classList.add('ring-2', 'ring-red-400', 'animate-pulse');
                  setTimeout(() => undoBtn.classList.remove('ring-2', 'ring-red-400', 'animate-pulse'), 1000);
@@ -603,7 +598,6 @@
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').textContent = msg;
             document.getElementById('toast-icon').className = `ph-fill ${iconClass} text-lg`;
-            
             toast.classList.remove('opacity-0', 'translate-y-[-20px]');
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-[-20px]');
@@ -618,7 +612,6 @@
 
         function processGiveUp() {
             document.getElementById('giveup-modal').classList.add('hidden');
-            
             const solution = solveLadder(currentLevelData.start, currentLevelData.end);
             const solutionDiv = document.getElementById('solution-path');
             solutionDiv.innerHTML = '';
@@ -630,11 +623,7 @@
                     const el = document.createElement('div');
                     el.className = "flex items-center gap-3 p-1.5 border-b border-slate-100 last:border-0";
                     let icon = index === 0 ? '🟢' : (word === currentLevelData.end ? '🏁' : '⬇️');
-                    
-                    el.innerHTML = `
-                        <div class="w-6 text-center text-xs">${icon}</div>
-                        <span class="font-mono font-bold text-base tracking-wider text-slate-700 uppercase">${word}</span>
-                    `;
+                    el.innerHTML = `<div class="w-6 text-center text-xs">${icon}</div><span class="font-mono font-bold text-base tracking-wider text-slate-700 uppercase">${word}</span>`;
                     solutionDiv.appendChild(el);
                 });
             }
@@ -652,10 +641,7 @@
             while (queue.length > 0) {
                 let path = queue.shift();
                 let word = path[path.length - 1];
-
-                if (word === end) {
-                    return path.slice(1);
-                }
+                if (word === end) return path.slice(1);
 
                 for (let i = 0; i < len; i++) {
                     const originalCharCode = word.charCodeAt(i);
@@ -663,11 +649,9 @@
                         if (c === originalCharCode) continue;
                         let char = String.fromCharCode(c);
                         let newWord = word.substring(0, i) + char + word.substring(i + 1);
-                        
                         if ((commonWords.has(newWord) || newWord === end) && !visited.has(newWord)) {
                             visited.add(newWord);
-                            let newPath = [...path, newWord];
-                            queue.push(newPath);
+                            queue.push([...path, newWord]);
                         }
                     }
                 }
@@ -693,7 +677,6 @@
             }
             saveProgress();
             renderPrizes();
-
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
             document.getElementById('win-steps').textContent = stepsTaken;
@@ -707,10 +690,8 @@
             } else {
                 rewardDisplay.classList.add('hidden');
             }
-
-            const winModal = document.getElementById('win-modal');
-            winModal.classList.remove('hidden');
-            winModal.classList.add('flex');
+            document.getElementById('win-modal').classList.remove('hidden');
+            document.getElementById('win-modal').classList.add('flex');
         }
 
         function closeWinModal() {
@@ -735,8 +716,11 @@
             const data = localStorage.getItem('wordLadderData_v3');
             if (data) {
                 const parsed = JSON.parse(data);
-                score = parsed.score || 0; 
+                score = parsed.score !== undefined ? parsed.score : INITIAL_SCORE;
                 unlockedPrizes = parsed.prizes || [];
+            } else {
+                score = INITIAL_SCORE;
+                saveProgress();
             }
             document.getElementById('score-display').textContent = score;
         }
@@ -767,28 +751,22 @@
         function renderPrizes() {
             const container = document.getElementById('prizes-grid');
             container.innerHTML = '';
-            
             if (unlockedPrizes.length === 0) {
                 document.getElementById('no-prizes-msg').classList.remove('hidden');
                 return;
             }
             document.getElementById('no-prizes-msg').classList.add('hidden');
-
             unlockedPrizes.forEach(id => {
                 const prize = prizesList.find(p => p.id === id);
                 if (prize) {
                     const div = document.createElement('div');
                     div.className = "flex flex-col items-center p-2 bg-indigo-50 rounded-lg border border-indigo-100";
-                    div.title = prize.desc;
-                    div.innerHTML = `
-                        <div class="text-2xl mb-1 filter drop-shadow-sm">${prize.icon}</div>
-                    `;
+                    div.innerHTML = `<div class="text-2xl mb-1 filter drop-shadow-sm">${prize.icon}</div>`;
                     container.appendChild(div);
                 }
             });
         }
 
-        // ADDED: Reset Function
         function resetProgress() {
             if(!confirm("確定要清除所有積分和獎品嗎？此動作無法復原。")) return;
             localStorage.removeItem('wordLadderData_v3');
