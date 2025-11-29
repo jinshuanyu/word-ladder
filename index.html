@@ -57,7 +57,8 @@
     <!-- Loading Overlay -->
     <div id="loading-screen" class="fixed inset-0 bg-slate-100 z-50 flex flex-col items-center justify-center transition-opacity duration-500">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-        <p class="text-indigo-600 font-bold animate-pulse">Loading Game Data...</p>
+        <p id="loading-text" class="text-indigo-600 font-bold animate-pulse">Loading Game Data...</p>
+        <p id="error-details" class="text-red-500 text-xs mt-4 text-center px-8 hidden"></p>
     </div>
 
     <!-- Header -->
@@ -145,20 +146,15 @@
             <!-- The Ladder Container -->
             <div id="ladder-container" class="flex flex-col gap-3 mb-6 relative">
                 
-                <!-- Start Word Block (Centered Layout) -->
+                <!-- Start Word Block -->
                 <div class="w-full p-4 bg-slate-800 text-white rounded-xl shadow-md flex flex-col items-center justify-center relative overflow-hidden min-h-[120px]">
-                    <!-- Centered Emoji -->
                     <div id="start-emoji" class="text-5xl mb-2 animate-float filter drop-shadow-lg">🍵</div>
-                    <!-- Word -->
                     <span id="start-word" class="font-mono text-3xl font-bold tracking-[0.2em] relative z-10">TEA</span>
-                    
                     <div class="absolute top-0 left-0 w-full h-1.5 bg-green-500"></div>
                 </div>
 
                 <!-- User Inputs Area -->
-                <div id="user-words" class="flex flex-col gap-2 min-h-[20px]">
-                    <!-- Dynamic inputs -->
-                </div>
+                <div id="user-words" class="flex flex-col gap-2 min-h-[20px]"></div>
 
                 <!-- Input Box -->
                 <div class="relative mt-2 group">
@@ -181,13 +177,10 @@
                     <i class="ph-fill ph-warning-circle"></i> <span>Error</span>
                 </p>
 
-                <!-- Target Word Block (Centered Layout) -->
+                <!-- Target Word Block -->
                 <div class="w-full p-4 bg-indigo-600 text-white rounded-xl shadow-md flex flex-col items-center justify-center relative overflow-hidden min-h-[120px] ring-4 ring-indigo-100">
-                    <!-- Centered Emoji -->
                     <div id="end-emoji" class="text-5xl mb-2 animate-float filter drop-shadow-lg">🫖</div>
-                    <!-- Word -->
                     <span id="end-word" class="font-mono text-3xl font-bold tracking-[0.2em] relative z-10">POT</span>
-                    
                     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-white opacity-30"></div>
                     <div class="text-[10px] font-sans tracking-normal opacity-80 absolute top-2 right-3 bg-indigo-800 px-2 py-0.5 rounded-full">TARGET</div>
                 </div>
@@ -197,7 +190,6 @@
     </main>
 
     <!-- Modals -->
-
     <!-- Tutorial Modal -->
     <div id="tutorial-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex justify-center items-center p-4 backdrop-blur-sm">
         <div class="bg-white w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl relative animate-pop max-h-[85vh] flex flex-col">
@@ -208,7 +200,6 @@
                 <h2 class="text-xl font-bold font-heading">如何遊玩？</h2>
                 <p class="text-xs text-indigo-200">Word Ladder 規則說明</p>
             </div>
-            
             <div class="p-6 overflow-y-auto">
                 <div class="space-y-6">
                     <div class="flex gap-4">
@@ -229,9 +220,7 @@
                         </div>
                     </div>
                 </div>
-                <button onclick="toggleTutorial()" class="w-full mt-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                    開始遊戲！
-                </button>
+                <button onclick="toggleTutorial()" class="w-full mt-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">開始遊戲！</button>
             </div>
         </div>
     </div>
@@ -260,18 +249,14 @@
                     <span class="text-slate-400 text-sm">步數:</span>
                     <span id="win-steps" class="font-bold text-xl text-indigo-600">0</span>
                 </div>
-                
                 <div id="reward-display" class="bg-gradient-to-br from-indigo-50 to-purple-50 p-4 rounded-xl border border-indigo-100 mb-6 hidden">
                     <p class="text-xs font-bold text-indigo-400 uppercase mb-2 tracking-widest">獲得新收藏</p>
                     <div class="text-5xl animate-bounce pt-2 pb-2 filter drop-shadow-sm" id="reward-icon">🎁</div>
                     <div class="text-indigo-900 font-bold mt-1 text-lg" id="reward-name">?</div>
                 </div>
-
                 <div class="flex gap-3 justify-center">
                     <button onclick="closeWinModal()" class="px-6 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition">選單</button>
-                    <button onclick="nextLevel()" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 flex items-center gap-2">
-                        下一關 <i class="ph-bold ph-arrow-right"></i>
-                    </button>
+                    <button onclick="nextLevel()" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 flex items-center gap-2">下一關 <i class="ph-bold ph-arrow-right"></i></button>
                 </div>
             </div>
         </div>
@@ -317,15 +302,18 @@
         let isDataLoaded = false;
 
         async function loadData() {
+            const loadingText = document.getElementById('loading-text');
+            const errorDetails = document.getElementById('error-details');
+            
             try {
-                // Parallel fetching
+                // Use explicit relative paths
                 const [dictRes, levelsRes] = await Promise.all([
-                    fetch('data/dictionary.json'),
-                    fetch('data/levels.json')
+                    fetch('./data/dictionary.json'),
+                    fetch('./data/levels.json')
                 ]);
 
-                if (!dictRes.ok) throw new Error("Failed to load dictionary");
-                if (!levelsRes.ok) throw new Error("Failed to load levels");
+                if (!dictRes.ok) throw new Error(`Dictionary load failed: ${dictRes.status}`);
+                if (!levelsRes.ok) throw new Error(`Levels load failed: ${levelsRes.status}`);
 
                 const dictArr = await dictRes.json();
                 commonWords = new Set(dictArr);
@@ -340,7 +328,455 @@
                 setTimeout(() => loader.remove(), 500);
 
             } catch (err) {
-                console.error(err);
-                document.getElementById('loading-screen').innerHTML = `
-                    <p class="text-red-500 font-bold p-4 text-center">
-                        Err
+                console.error("Game Load Error:", err);
+                loadingText.textContent = "Data Load Failed!";
+                loadingText.className = "text-red-600 font-bold mb-2";
+                
+                // Friendly error message for users
+                let msg = "無法讀取遊戲資料。";
+                if (window.location.protocol === 'file:') {
+                    msg += "<br>請勿直接開啟 HTML 檔，請使用 Local Server 或上傳至 GitHub Pages。";
+                } else {
+                    msg += "<br>請檢查 data/dictionary.json 與 data/levels.json 是否存在。";
+                }
+                msg += `<br><br><span class="text-slate-400 font-mono">${err.message}</span>`;
+                
+                errorDetails.innerHTML = msg;
+                errorDetails.classList.remove('hidden');
+                
+                // Stop the spinner
+                document.querySelector('.animate-spin').classList.add('hidden');
+            }
+        }
+
+        // --- GAME STATE ---
+        let currentLevelType = 'easy';
+        let currentLevelIndex = 0;
+        let currentLevelData = null;
+        let currentWord = "";
+        let stepsTaken = 0;
+        let userPath = [];
+        let score = 0;
+        let unlockedPrizes = [];
+        const HINT_COST = 50;
+
+        const prizesList = [
+            { id: 'p1', icon: '🍎', name: '新鮮蘋果', desc: '健康的第一步' },
+            { id: 'p2', icon: '🚲', name: '腳踏車', desc: '輕快前行' },
+            { id: 'p3', icon: '🎸', name: '電吉他', desc: '搖滾靈魂' },
+            { id: 'p4', icon: '🚀', name: '小火箭', desc: '飛向宇宙' },
+            { id: 'p5', icon: '💎', name: '藍鑽石', desc: '稀世珍寶' },
+            { id: 'p6', icon: '🏰', name: '夢幻城堡', desc: '王者的歸屬' },
+            { id: 'p7', icon: '🦄', name: '獨角獸', desc: '傳說生物' },
+            { id: 'p8', icon: '🪐', name: '土星環', desc: '星際旅者' },
+            { id: 'p9', icon: '🦖', name: '霸王龍', desc: '史前巨獸' },
+            { id: 'p10', icon: '🗽', name: '自由女神', desc: '自由之光' },
+            { id: 'p11', icon: '🐱', name: '招財貓', desc: '好運連連' },
+            { id: 'p12', icon: '🌵', name: '小仙人掌', desc: '療癒多肉' },
+            { id: 'p13', icon: '🎮', name: '遊戲手把', desc: '宅家必備' },
+            { id: 'p14', icon: '⛺', name: '露營帳篷', desc: '野外探險' },
+            { id: 'p15', icon: '🍜', name: '拉麵', desc: '暖心美味' },
+            { id: 'p16', icon: '🚁', name: '直升機', desc: '空中巡航' }
+        ];
+
+        window.onload = () => {
+            loadProgress();
+            renderPrizes();
+            loadData();
+        };
+
+        // --- GAME LOGIC ---
+
+        function startGame(difficulty) {
+            if (!isDataLoaded) {
+                showToast("資料載入中，請稍候...", "ph-spinner");
+                return;
+            }
+
+            currentLevelType = difficulty;
+            const levels = levelsData[difficulty];
+            if (!levels || levels.length === 0) {
+                showToast("此難度目前沒有題目", "ph-warning");
+                return;
+            }
+
+            currentLevelIndex = Math.floor(Math.random() * levels.length);
+            currentLevelData = levels[currentLevelIndex];
+            
+            resetGame();
+            
+            document.getElementById('level-select-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('flex');
+            
+            window.scrollTo(0, 0);
+        }
+
+        function resetGame() {
+            currentWord = currentLevelData.start;
+            stepsTaken = 0;
+            userPath = []; 
+            
+            document.getElementById('start-word').textContent = currentLevelData.start.toUpperCase();
+            document.getElementById('end-word').textContent = currentLevelData.end.toUpperCase();
+            
+            // Set Emojis
+            document.getElementById('start-emoji').textContent = currentLevelData.startEmoji || '❓';
+            document.getElementById('end-emoji').textContent = currentLevelData.endEmoji || '❓';
+
+            document.getElementById('target-moves').textContent = currentLevelData.minSteps;
+            document.getElementById('user-words').innerHTML = '';
+            
+            const input = document.getElementById('next-word-input');
+            input.value = '';
+            input.setAttribute('maxlength', currentLevelData.start.length);
+            input.disabled = false;
+            
+            setTimeout(() => input.focus(), 100);
+
+            updateStatus();
+        }
+
+        function returnToMenu() {
+            document.querySelectorAll('.fixed').forEach(el => {
+                if(el.id !== 'toast' && el.id !== 'loading-screen') {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+            
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('flex');
+            document.getElementById('level-select-screen').classList.remove('hidden');
+        }
+
+        function isOneLetterDifferent(word1, word2) {
+            if (word1.length !== word2.length) return false;
+            let diff = 0;
+            for (let i = 0; i < word1.length; i++) {
+                if (word1[i] !== word2[i]) diff++;
+            }
+            return diff === 1;
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.querySelector('span').textContent = msg;
+            el.classList.remove('opacity-0');
+            
+            const input = document.getElementById('next-word-input');
+            input.classList.add('shake-anim');
+            setTimeout(() => input.classList.remove('shake-anim'), 400);
+
+            setTimeout(() => {
+                el.classList.add('opacity-0');
+            }, 2500);
+        }
+
+        function submitWord() {
+            const input = document.getElementById('next-word-input');
+            let val = input.value.toLowerCase().trim();
+            const startLen = currentLevelData.start.length;
+
+            if (val.length !== startLen) {
+                showError(`請輸入 ${startLen} 個字母`);
+                return;
+            }
+
+            if (val === currentWord) {
+                showError("請改變一個字母");
+                return;
+            }
+
+            if (!commonWords.has(val) && val !== currentLevelData.end) {
+                showError("字典裡找不到這個字");
+                return;
+            }
+
+            if (!isOneLetterDifferent(currentWord, val)) {
+                showError("只能改變一個字母！");
+                return;
+            }
+            
+            if (userPath.includes(val) || val === currentLevelData.start) {
+                 showError("你已經用過這個字了");
+                 return;
+            }
+
+            addWordToChain(val);
+            input.value = '';
+            input.focus();
+            
+            if (val === currentLevelData.end) {
+                handleWin();
+            }
+        }
+
+        document.getElementById('next-word-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') submitWord();
+        });
+
+        function addWordToChain(word) {
+            currentWord = word;
+            stepsTaken++;
+            userPath.push(word);
+
+            const container = document.getElementById('user-words');
+            const div = document.createElement('div');
+            div.className = "p-3 bg-white border border-slate-200 rounded-lg text-center font-mono text-xl font-bold tracking-[0.2em] text-slate-700 shadow-sm pop-in flex items-center justify-center relative";
+            
+            let prevWord = userPath.length > 1 ? userPath[userPath.length - 2] : currentLevelData.start;
+            let html = "";
+            for(let i=0; i<word.length; i++) {
+                if(word[i] !== prevWord[i]) {
+                    html += `<span class="text-indigo-600 font-extrabold bg-indigo-50 rounded px-1">${word[i].toUpperCase()}</span>`;
+                } else {
+                    html += word[i].toUpperCase();
+                }
+            }
+            div.innerHTML = html;
+            
+            if (stepsTaken > 1) {
+                const line = document.createElement('div');
+                line.className = "absolute -top-3 left-1/2 w-0.5 h-3 bg-slate-200";
+                div.appendChild(line);
+            }
+
+            container.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            updateStatus();
+        }
+
+        function updateStatus() {
+            document.getElementById('move-count').textContent = stepsTaken;
+        }
+
+        function getHint() {
+            if (score < HINT_COST) {
+                showToast("積分不足！需要 50 積分", "ph-warning");
+                return;
+            }
+
+            const path = solveLadder(currentWord, currentLevelData.end);
+            
+            if (!path || path.length === 0) {
+                 showToast("無法計算提示路徑", "ph-x-circle");
+                 return;
+            }
+
+            const nextWord = path[0];
+            score -= HINT_COST;
+            saveProgress();
+            
+            const scoreEl = document.getElementById('score-display');
+            scoreEl.classList.add('text-red-500');
+            setTimeout(() => scoreEl.classList.remove('text-red-500'), 500);
+
+            const input = document.getElementById('next-word-input');
+            input.value = nextWord.toUpperCase();
+            input.focus();
+            
+            showToast(`已扣除 ${HINT_COST} 積分，提示已填入`, "ph-lightbulb");
+        }
+
+        function showToast(msg, iconClass) {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastMsg = document.getElementById('toast-msg');
+            
+            toastMsg.textContent = msg;
+            toastIcon.className = `ph-fill ${iconClass} text-xl`;
+            
+            toast.classList.remove('opacity-0', 'translate-y-[-20px]');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-20px]');
+            }, 3000);
+        }
+
+        function confirmGiveUp() {
+            const modal = document.getElementById('giveup-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function processGiveUp() {
+            document.getElementById('giveup-modal').classList.add('hidden');
+            document.getElementById('next-word-input').disabled = true;
+            
+            const solution = solveLadder(currentWord, currentLevelData.end);
+            const solutionDiv = document.getElementById('solution-path');
+            solutionDiv.innerHTML = '';
+            
+            if (!solution) {
+                solutionDiv.innerHTML = '<div class="p-4 text-center text-red-500">找不到路徑！(可能是字典缺字)</div>';
+            } else {
+                solution.forEach((word, index) => {
+                    const el = document.createElement('div');
+                    el.className = "flex items-center gap-3 p-2 border-b border-slate-100 last:border-0";
+                    let icon = index === 0 ? '<i class="ph-fill ph-arrow-circle-right text-indigo-500 text-xl"></i>' : 
+                               (index === solution.length -1 ? '<i class="ph-fill ph-flag-checkered text-green-500 text-xl"></i>' : '<i class="ph-bold ph-arrow-down text-slate-300"></i>');
+                    
+                    el.innerHTML = `
+                        <div class="w-8 text-center flex justify-center">${icon}</div>
+                        <span class="font-mono font-bold text-lg tracking-wider text-slate-700 uppercase">${word}</span>
+                    `;
+                    solutionDiv.appendChild(el);
+                });
+            }
+
+            const solModal = document.getElementById('solution-modal');
+            solModal.classList.remove('hidden');
+            solModal.classList.add('flex');
+        }
+
+        function solveLadder(start, end) {
+            let queue = [[start]];
+            let visited = new Set([start]);
+            const searchDict = new Set(commonWords);
+            searchDict.add(end); 
+
+            while (queue.length > 0) {
+                let path = queue.shift();
+                let word = path[path.length - 1];
+
+                if (word === end) {
+                    return path.slice(1);
+                }
+
+                for (let i = 0; i < word.length; i++) {
+                    for (let c = 97; c <= 122; c++) { 
+                        let char = String.fromCharCode(c);
+                        if (char === word[i]) continue;
+                        let newWord = word.substring(0, i) + char + word.substring(i + 1);
+                        
+                        if (searchDict.has(newWord) && !visited.has(newWord)) {
+                            visited.add(newWord);
+                            let newPath = [...path, newWord];
+                            queue.push(newPath);
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        function handleWin() {
+            const extraSteps = Math.max(0, stepsTaken - currentLevelData.minSteps);
+            const levelBonus = currentLevelType === 'easy' ? 0 : (currentLevelType === 'medium' ? 50 : 100);
+            const gainedScore = Math.max(10, 100 - (extraSteps * 10) + levelBonus);
+
+            score += gainedScore;
+            saveProgress();
+
+            let prizeWon = null;
+            if (Math.random() > 0.6 || unlockedPrizes.length === 0) { 
+                const lockedPrizes = prizesList.filter(p => !unlockedPrizes.includes(p.id));
+                if (lockedPrizes.length > 0) {
+                    prizeWon = lockedPrizes[Math.floor(Math.random() * lockedPrizes.length)];
+                    unlockedPrizes.push(prizeWon.id);
+                    document.getElementById('new-prize-badge').classList.remove('hidden');
+                    saveProgress();
+                    renderPrizes();
+                }
+            }
+
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+            document.getElementById('win-steps').textContent = stepsTaken;
+            document.getElementById('score-display').textContent = score;
+            
+            const rewardDisplay = document.getElementById('reward-display');
+            if (prizeWon) {
+                rewardDisplay.classList.remove('hidden');
+                document.getElementById('reward-icon').textContent = prizeWon.icon;
+                document.getElementById('reward-name').textContent = prizeWon.name;
+            } else {
+                rewardDisplay.classList.add('hidden');
+            }
+
+            const winModal = document.getElementById('win-modal');
+            winModal.classList.remove('hidden');
+            winModal.classList.add('flex');
+        }
+
+        function closeWinModal() {
+            document.getElementById('win-modal').classList.add('hidden');
+            document.getElementById('win-modal').classList.remove('flex');
+            returnToMenu();
+        }
+
+        function nextLevel() {
+            document.getElementById('win-modal').classList.add('hidden');
+            document.getElementById('win-modal').classList.remove('flex');
+            startGame(currentLevelType);
+        }
+
+        function saveProgress() {
+            const data = { score: score, prizes: unlockedPrizes, hasPlayed: true };
+            localStorage.setItem('wordLadderData_v3', JSON.stringify(data));
+            document.getElementById('score-display').textContent = score;
+        }
+
+        function loadProgress() {
+            const data = localStorage.getItem('wordLadderData_v3');
+            if (data) {
+                const parsed = JSON.parse(data);
+                score = parsed.score !== undefined ? parsed.score : 200; 
+                unlockedPrizes = parsed.prizes || [];
+            } else {
+                score = 200; 
+                toggleTutorial(); 
+            }
+            document.getElementById('score-display').textContent = score;
+        }
+
+        function togglePrizes() {
+            const modal = document.getElementById('prizes-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                document.getElementById('new-prize-badge').classList.add('hidden');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function toggleTutorial() {
+            const modal = document.getElementById('tutorial-modal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function renderPrizes() {
+            const container = document.getElementById('prizes-grid');
+            container.innerHTML = '';
+            
+            if (unlockedPrizes.length === 0) {
+                document.getElementById('no-prizes-msg').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('no-prizes-msg').classList.add('hidden');
+
+            unlockedPrizes.forEach(id => {
+                const prize = prizesList.find(p => p.id === id);
+                if (prize) {
+                    const div = document.createElement('div');
+                    div.className = "flex flex-col items-center p-2 bg-indigo-50 rounded-xl border border-indigo-100 hover:scale-105 transition cursor-help";
+                    div.title = prize.desc;
+                    div.innerHTML = `
+                        <div class="text-3xl mb-1 filter drop-shadow-sm">${prize.icon}</div>
+                        <div class="text-[9px] font-bold text-slate-600 text-center leading-tight">${prize.name}</div>
+                    `;
+                    container.appendChild(div);
+                }
+            });
+        }
+    </script>
+</body>
+                    </html>
