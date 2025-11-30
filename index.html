@@ -66,7 +66,7 @@
             </div>
 
             <div class="bg-orange-50 p-3 rounded-2xl border border-orange-200 flex flex-col items-center justify-center flex-1 md:flex-none">
-                <p class="text-[9px] font-bold text-orange-400 uppercase tracking-wider mb-1">積分</p>
+                <p class="text-[11px] font-bold text-orange-400 uppercase tracking-wider mb-1">積分</p>
                 <div class="flex items-center gap-1">
                     <i class="ph-fill ph-coin text-orange-500 text-sm"></i>
                     <p class="text-xl font-bold text-orange-600 leading-none" id="score-display">200</p>
@@ -78,12 +78,12 @@
                     <i class="ph ph-trophy text-2xl text-yellow-600 group-hover:scale-110 transition duration-300"></i>
                     <span id="new-prize-badge" class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full hidden animate-bounce border-2 border-white"></span>
                 </div>
-                <p class="text-[9px] font-bold text-yellow-600 uppercase tracking-wider mt-1">獎品</p>
+                <p class="text-[11px] font-bold text-yellow-600 uppercase tracking-wider mt-1">獎品</p>
             </button>
 
             <button id="sidebar-back-btn" onclick="confirmGiveUp()" class="hidden bg-white p-3 rounded-2xl border border-slate-200 hover:bg-slate-50 transition text-slate-400 hover:text-red-400 flex-col items-center">
                 <i class="ph ph-flag text-xl"></i>
-                <p class="text-[9px] font-bold mt-1">放棄</p>
+                <p class="text-[11px] font-bold mt-1">放棄</p>
             </button>
 
         </aside>
@@ -134,7 +134,7 @@
                         <i class="ph ph-flag"></i> 放棄
                     </button>
                     <div class="text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full">
-                        步數：<span id="move-count" class="text-slate-800">0</span> / <span id="target-moves">--</span>
+                        最少步數：<span id="move-count" class="text-slate-800">0</span> / <span id="target-moves">--</span>
                     </div>
                 </div>
                 
@@ -160,7 +160,7 @@
                     <div class="flex gap-2 mt-1">
                         <button onclick="undoLastMove()" id="undo-btn" class="w-14 h-[60px] bg-slate-200 text-slate-500 rounded-xl hover:bg-slate-300 active:scale-95 transition flex flex-col items-center justify-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed" title="復原一步" disabled>
                             <i class="ph-bold ph-arrow-u-up-left text-xl"></i>
-                            <span class="text-[9px] font-bold">復原</span>
+                            <span class="text-[11px] font-bold">復原</span>
                         </button>
 
                         <div class="relative group flex-grow">
@@ -189,7 +189,7 @@
                             <span id="end-word" class="font-mono text-xl font-bold tracking-[0.2em] text-indigo-100"></span>
                         </div>
                         <i class="ph-fill ph-flag-checkered text-white text-xl z-10 opacity-50"></i>
-                        <div class="absolute top-0 right-3 bg-indigo-800 px-2 py-0.5 rounded-b-lg text-[8px] font-bold tracking-widest opacity-60">目標</div>
+                        <div class="absolute top-0 right-3 bg-indigo-800 px-2 py-0.5 rounded-b-lg text-[11px] font-bold tracking-widest opacity-60">目標</div>
                     </div>
                 </div>
             </div>
@@ -209,7 +209,7 @@
                 <div class="flex gap-3">
                     <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-indigo-600 font-bold shrink-0 text-sm">1</div>
                     <div>
-                        <h3 class="font-bold text-slate-800 text-sm">每次只改變一個字母</h3>
+                        <h3 class="font-bold text-slate-800 text-sm">每次只改變 1 個字母，越快到達目標越厲害！</h3>
                         <div class="mt-1 bg-slate-50 p-1.5 rounded-lg font-mono text-center text-xs border border-slate-200 text-slate-600">
                             TEA <i class="ph ph-arrow-right text-[10px]"></i> <b class="text-green-600">P</b>EA <i class="ph ph-arrow-right text-[10px]"></i> P<b class="text-green-600">E</b>T
                         </div>
