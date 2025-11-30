@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Ladder Quest v3.4.2</title>
+    <title>Word Ladder Quest v3.5 (No Repeat)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -339,6 +339,9 @@
         let userPath = [];
         let score = 200;
         let unlockedPrizes = [];
+        // NEW: Track played levels per difficulty
+        let playedHistory = { easy: [], medium: [], hard: [] };
+        
         const HINT_COST = 50;
         const INITIAL_SCORE = 200;
 
@@ -365,19 +368,41 @@
 
         // --- GAME LOGIC ---
 
+        // Helper to generate a unique ID for a level
+        function getLevelId(level) {
+            return `${level.start}_${level.end}`;
+        }
+
         function startGame(difficulty) {
             if (!isDataLoaded) return;
 
             currentLevelType = difficulty;
-            const levels = levelsData[difficulty] || FALLBACK_LEVELS[difficulty];
+            // Get all levels for this difficulty
+            let allLevels = levelsData[difficulty] || FALLBACK_LEVELS[difficulty];
             
-            if (!levels || levels.length === 0) {
+            if (!allLevels || allLevels.length === 0) {
                 showToast("此難度無題目", "ph-warning");
                 return;
             }
 
-            const idx = Math.floor(Math.random() * levels.length);
-            currentLevelData = levels[idx];
+            // --- NO REPEAT LOGIC ---
+            // 1. Get played list for this difficulty
+            let played = playedHistory[difficulty] || [];
+            
+            // 2. Filter available levels
+            let candidates = allLevels.filter(lvl => !played.includes(getLevelId(lvl)));
+
+            // 3. If no candidates left, reset history
+            if (candidates.length === 0) {
+                showToast("題目已全破！重新洗牌...", "ph-arrows-clockwise");
+                playedHistory[difficulty] = []; // Clear local state
+                candidates = allLevels; // Reset pool
+                saveProgress(); // Update storage
+            }
+
+            // 4. Pick random from CANDIDATES (not allLevels)
+            const idx = Math.floor(Math.random() * candidates.length);
+            currentLevelData = candidates[idx];
             
             commonWords.add(currentLevelData.start);
             commonWords.add(currentLevelData.end);
@@ -388,9 +413,8 @@
             document.getElementById('game-screen').classList.remove('hidden');
             document.getElementById('game-screen').classList.add('flex');
             
-            // SHOW sidebar button only on Desktop
             const sbBtn = document.getElementById('sidebar-back-btn');
-            sbBtn.classList.add('md:flex'); // Add desktop visibility
+            sbBtn.classList.add('md:flex');
         }
 
         function resetGame() {
@@ -411,7 +435,6 @@
             input.setAttribute('maxlength', currentLevelData.start.length);
             input.disabled = false;
             
-            // Disable undo initially
             document.getElementById('undo-btn').disabled = true;
             
             setTimeout(() => input.focus(), 100);
@@ -429,7 +452,6 @@
             document.getElementById('game-screen').classList.remove('flex');
             document.getElementById('level-select-screen').classList.remove('hidden');
             
-            // HIDE sidebar button
             const sbBtn = document.getElementById('sidebar-back-btn');
             sbBtn.classList.remove('md:flex');
         }
@@ -508,7 +530,6 @@
 
             const container = document.getElementById('user-words');
             const div = document.createElement('div');
-            
             div.className = "p-2 bg-white border border-slate-200 rounded-lg text-center font-mono text-lg font-bold tracking-[0.2em] text-slate-700 shadow-sm pop-in flex items-center justify-center relative";
             
             let html = "";
@@ -531,10 +552,9 @@
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             
             updateStatus();
-            document.getElementById('undo-btn').disabled = false; // Enable Undo
+            document.getElementById('undo-btn').disabled = false;
         }
 
-        // --- UNDO FUNCTION ---
         function undoLastMove() {
             if (userPath.length === 0) return;
             userPath.pop();
@@ -666,6 +686,10 @@
 
             score += gainedScore;
             
+            // --- MARK LEVEL AS PLAYED ---
+            if (!playedHistory[currentLevelType]) playedHistory[currentLevelType] = [];
+            playedHistory[currentLevelType].push(getLevelId(currentLevelData));
+            
             let prizeWon = null;
             if (Math.random() > 0.5 && prizesList.length > unlockedPrizes.length) { 
                 const lockedPrizes = prizesList.filter(p => !unlockedPrizes.includes(p.id));
@@ -707,7 +731,11 @@
         }
 
         function saveProgress() {
-            const data = { score: score, prizes: unlockedPrizes };
+            const data = { 
+                score: score, 
+                prizes: unlockedPrizes,
+                playedHistory: playedHistory // Save history
+            };
             localStorage.setItem('wordLadderData_v3', JSON.stringify(data));
             document.getElementById('score-display').textContent = score;
         }
@@ -718,6 +746,8 @@
                 const parsed = JSON.parse(data);
                 score = parsed.score !== undefined ? parsed.score : INITIAL_SCORE;
                 unlockedPrizes = parsed.prizes || [];
+                // Load played history (fallback to empty logic)
+                playedHistory = parsed.playedHistory || { easy: [], medium: [], hard: [] };
             } else {
                 score = INITIAL_SCORE;
                 saveProgress();
