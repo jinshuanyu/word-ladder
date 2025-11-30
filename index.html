@@ -7,7 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+    <!-- Font Awesome for footer icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@400;700&display=swap');
 
@@ -129,19 +131,19 @@
             </div>
 
             <div id="game-screen" class="hidden flex-col">
-                <div class="flex justify-between items-center mb-3 md:hidden">
+                <!-- Mobile top bar：只留放棄按鈕，步數不顯示 -->
+                <div class="flex justify-start items-center mb-3 md:hidden">
                     <button onclick="confirmGiveUp()" class="text-xs text-slate-400 hover:text-red-500 font-bold flex items-center gap-1 px-2 py-1 bg-white rounded-lg border border-slate-200">
                         <i class="ph ph-flag"></i> 放棄
                     </button>
-                    <div class="text-xs font-bold text-slate-500 bg-slate-200 px-3 py-1 rounded-full">
-                        最少步數：<span id="move-count" class="text-slate-800">0</span> / <span id="target-moves">--</span>
-                    </div>
                 </div>
-                
-                <div class="hidden md:flex justify-end mb-2">
-                     <div class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-sm">
-                        步數：<span id="move-count-d" class="text-indigo-600">0</span> / <span id="target-moves-d">--</span>
-                    </div>
+
+                <!-- 隱藏用來更新的步數元素（給 JS 用，不顯示在畫面上） -->
+                <div class="hidden">
+                    <span id="move-count">0</span>
+                    <span id="target-moves">--</span>
+                    <span id="move-count-d">0</span>
+                    <span id="target-moves-d">--</span>
                 </div>
 
                 <div id="ladder-container" class="flex flex-col gap-2 relative">
@@ -291,6 +293,19 @@
         <i id="toast-icon" class="ph-fill ph-info text-lg"></i>
         <span id="toast-msg" class="font-bold text-xs">提示</span>
     </div>
+
+    <!-- Footer 聯絡資訊 -->
+    <footer class="mt-8 w-full max-w-2xl text-center">
+      <div class="credits text-sm text-gray-600 leading-snug">
+        © 2025 Christina Yu. All rights reserved. <br />
+        <a href="mailto:mamahowma@gmail.com" class="underline text-blue-700">
+          <i class="fa-solid fa-envelope text-xl"></i></a>　<a href="https://www.facebook.com/mamahowma" target="_blank" class="text-blue-600">
+          <i class="fa-brands fa-facebook text-xl"></i>
+        </a>　<a href="https://portaly.cc/mamahowma/support" target="_blank" class="text-yellow-700">
+          <i class="fa-solid fa-mug-hot text-xl"></i>
+        </a> 
+      </div>
+    </footer>
 
     <script>
         // --- DATA & CONFIG ---
